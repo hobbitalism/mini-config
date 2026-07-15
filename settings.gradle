@@ -1,0 +1,6 @@
+rootProject.name = 'mini-config'
+
+include 'core'
+include 'yaml'
+include 'json'
+include 'bukkit'

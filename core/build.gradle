@@ -1,0 +1,40 @@
+plugins {
+    id 'java'
+    id 'java-library'
+}
+
+dependencies {
+    testImplementation project(':yaml')
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifactId = 'mini-config-core'
+            pom {
+                name = 'MiniConfig Core'
+                description = 'MiniConfig — core interfaces and abstractions for a lightweight configuration library'
+                url = 'https://github.com/hobbitalism/mini-config'
+                licenses {
+                    license {
+                        name = 'MIT License'
+                        url = 'https://opensource.org/licenses/MIT'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/hobbitalism/mini-config.git'
+                    developerConnection = 'scm:git:ssh://github.com/hobbitalism/mini-config.git'
+                    url = 'https://github.com/hobbitalism/mini-config'
+                }
+                developers {
+                    developer {
+                        id = 'hobbitalism'
+                        name = 'hobbitalism'
+                        email = 'hobbitalism@users.noreply.github.com'
+                    }
+                }
+            }
+        }
+    }
+}
