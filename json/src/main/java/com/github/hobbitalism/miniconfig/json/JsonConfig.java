@@ -107,6 +107,7 @@ public class JsonConfig implements Config {
     @Override public List<String> getStringList(String key)                   { return section.getStringList(key); }
     @Override public Optional<ConfigSection> getSection(String key)           { return section.getSection(key); }
     @Override public void set(String key, Object value)                       { section.set(key, value); }
+    @Override public void setComment(String key, String comment)              { section.setComment(key, comment); }
 
     /**
      * Returns the underlying {@link JsonConfigSection} for direct access.

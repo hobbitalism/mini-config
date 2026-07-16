@@ -1,5 +1,6 @@
 package com.github.hobbitalism.miniconfig.json;
 
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.hobbitalism.miniconfig.ConfigLoader;
@@ -30,10 +31,11 @@ public class JsonConfigLoader implements ConfigLoader<JsonConfigSection> {
     private final ObjectMapper mapper;
 
     /**
-     * Constructs a loader with a default {@link ObjectMapper}.
+     * Constructs a loader with a default {@link ObjectMapper}
+     * configured to allow JSON comments.
      */
     public JsonConfigLoader() {
-        this(new ObjectMapper());
+        this(new ObjectMapper().configure(JsonParser.Feature.ALLOW_COMMENTS, true));
     }
 
     /**

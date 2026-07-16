@@ -62,4 +62,17 @@ public interface ConfigSection {
      * Sets a value at the given key.
      */
     void set(String key, Object value);
+
+    /**
+     * Attaches a descriptive comment to a config path.
+     *
+     * <p>Implementations that support comments (e.g. JSON, YAML serializers)
+     * may emit these as {@code //} or {@code #} lines above the corresponding key.
+     * The default implementation is a no-op.
+     *
+     * @param path    the dot-separated config path
+     * @param comment the comment text (without comment prefix)
+     */
+    default void setComment(String path, String comment) {
+    }
 }

@@ -1,6 +1,7 @@
 package com.github.hobbitalism.miniconfig.container;
 
 import com.github.hobbitalism.miniconfig.ConfigSection;
+import com.github.hobbitalism.miniconfig.annotation.Comment;
 import com.github.hobbitalism.miniconfig.annotation.Converter;
 import com.github.hobbitalism.miniconfig.annotation.Default;
 import com.github.hobbitalism.miniconfig.annotation.Ignore;
@@ -131,7 +132,7 @@ public class ConfigContainer {
     // Load path
     // -------------------------------------------------------------------------
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"rawtypes"})
     private void bindFromSection(Object target, Field field, ConfigSection section) {
         String path = resolvePath(field);
 
@@ -185,6 +186,8 @@ public class ConfigContainer {
 
         if (value == null) return;
 
+        String path = resolvePath(field);
+
         TypeConverter converter = resolveConverter(field);
         Object serialized;
         try {
@@ -194,7 +197,12 @@ public class ConfigContainer {
                     "Failed to serialize field '" + field.getName() + "'", e);
         }
 
-        section.set(resolvePath(field), serialized);
+        section.set(path, serialized);
+
+        Comment comment = field.getAnnotation(Comment.class);
+        if (comment != null && comment.value().length > 0) {
+            section.setComment(path, String.join("\n", comment.value()));
+        }
     }
 
     // -------------------------------------------------------------------------
