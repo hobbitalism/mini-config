@@ -2,6 +2,59 @@
 
 Annotation-driven configuration library for Java with YAML, JSON, and Bukkit support.
 
+## Installation
+
+**Gradle**
+
+```groovy
+repositories {
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    implementation 'com.github.hobbitalism:mini-config:VERSION'
+    // Or depend on specific modules:
+    implementation 'com.github.hobbitalism:mini-config:VERSION:yaml'
+    implementation 'com.github.hobbitalism:mini-config:VERSION:json'
+    implementation 'com.github.hobbitalism:mini-config:VERSION:bukkit'
+}
+```
+
+**Maven**
+
+```xml
+<repositories>
+    <repository>
+        <id>jitpack.io</id>
+        <url>https://jitpack.io</url>
+    </repository>
+</repositories>
+
+<dependency>
+    <groupId>com.github.hobbitalism</groupId>
+    <artifactId>mini-config</artifactId>
+    <version>VERSION</version>
+</dependency>
+<!-- Or specific modules: -->
+<dependency>
+    <groupId>com.github.hobbitalism</groupId>
+    <artifactId>mini-config</artifactId>
+    <version>VERSION</version>
+    <classifier>yaml</classifier>
+</dependency>
+<dependency>
+    <groupId>com.github.hobbitalism</groupId>
+    <artifactId>mini-config</artifactId>
+    <version>VERSION</version>
+    <classifier>json</classifier>
+</dependency>
+```
+
+Replace `VERSION` with a [Git tag](https://github.com/hobbitalism/mini-config/tags) or a commit hash.
+
+> JitPack builds require Java 21. Ensure your project targets at least JDK 21, or configure
+> [jitpack.yml](jitpack.yml) if using a custom build environment.
+
 ## Modules
 
 | Module | Artifact | Description |
