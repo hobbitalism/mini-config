@@ -12,8 +12,8 @@ import java.util.Map;
  * {@link ConfigLoader} that parses YAML documents into a {@link YamlConfigSection}
  * using SnakeYAML.
  *
- * <p>A new {@link Yaml} instance is created per load call to ensure thread safety
- * (SnakeYAML's {@code Yaml} is not thread-safe).
+ * <p>A per-thread {@link Yaml} instance is cached to avoid re-initializing
+ * SnakeYAML's parsing machinery on every load while maintaining thread safety.
  *
  * <pre>{@code
  * YamlConfigLoader loader = new YamlConfigLoader();
@@ -22,11 +22,12 @@ import java.util.Map;
  */
 public class YamlConfigLoader implements ConfigLoader<YamlConfigSection> {
 
+    private static final ThreadLocal<Yaml> YAML = ThreadLocal.withInitial(Yaml::new);
+
     @Override
     @SuppressWarnings("unchecked")
     public YamlConfigSection load(Reader reader) throws IOException {
-        Yaml yaml = new Yaml();
-        Object parsed = yaml.load(reader);
+        Object parsed = YAML.get().load(reader);
         if (parsed == null) {
             // Empty or blank document
             return new YamlConfigSection();

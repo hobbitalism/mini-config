@@ -5,8 +5,13 @@ public final class BooleanConverter implements TypeConverter<Boolean> {
     public Boolean deserialize(Object raw) {
         if (raw instanceof Boolean) return (Boolean) raw;
         String s = raw.toString().trim();
-        if (s.equalsIgnoreCase("true") || s.equalsIgnoreCase("t") || s.equals("1")) return true;
-        if (s.equalsIgnoreCase("false") || s.equalsIgnoreCase("f") || s.equals("0")) return false;
+        if (s.length() == 1) {
+            char c = s.charAt(0);
+            if (c == '1' || c == 't' || c == 'T') return true;
+            if (c == '0' || c == 'f' || c == 'F') return false;
+        }
+        if ("true".equals(s) || "TRUE".equals(s)) return true;
+        if ("false".equals(s) || "FALSE".equals(s)) return false;
         throw new ConversionException("Cannot convert to boolean: '" + raw + "'");
     }
 

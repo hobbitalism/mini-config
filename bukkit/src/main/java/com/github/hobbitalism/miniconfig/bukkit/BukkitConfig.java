@@ -5,10 +5,10 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
@@ -46,9 +46,7 @@ public class BukkitConfig implements Config {
     public void load() throws IOException {
         if (!configFile.exists()) {
             plugin.getDataFolder().mkdirs();
-            // Copy the bundled default from the plugin jar, if present
-            InputStream defaultStream = plugin.getResource(fileName);
-            if (defaultStream != null) {
+            if (plugin.getResource(fileName) != null) {
                 plugin.saveResource(fileName, false);
             } else {
                 configFile.createNewFile();
@@ -56,12 +54,14 @@ public class BukkitConfig implements Config {
         }
         handle = YamlConfiguration.loadConfiguration(configFile);
 
-        // Merge defaults from the bundled resource, if present
-        InputStream defaultStream = plugin.getResource(fileName);
-        if (defaultStream != null) {
-            YamlConfiguration defaults = YamlConfiguration.loadConfiguration(
-                    new InputStreamReader(defaultStream, StandardCharsets.UTF_8));
-            handle.setDefaults(defaults);
+        try (InputStream defaultStream = plugin.getResource(fileName)) {
+            if (defaultStream != null) {
+                try (BufferedReader reader = new BufferedReader(
+                        new java.io.InputStreamReader(defaultStream, StandardCharsets.UTF_8))) {
+                    YamlConfiguration defaults = YamlConfiguration.loadConfiguration(reader);
+                    handle.setDefaults(defaults);
+                }
+            }
         }
     }
 

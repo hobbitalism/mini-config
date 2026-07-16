@@ -9,23 +9,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-/**
- * {@link ConfigSerializer} that writes a {@link YamlConfigSection} back to
- * YAML text using SnakeYAML.
- *
- * <p>Output uses block style with an indent of 2 spaces, which is the
- * conventional format for hand-edited config files.
- */
 public class YamlConfigSerializer implements ConfigSerializer<YamlConfigSection> {
 
     private static final Pattern NEEDS_QUOTING = Pattern.compile(
             "[:\\[\\]{}&#*!|>'\"%@`]|^[\\-? ]|^[ \\t]|^[0-9]|\\s$");
 
+    private static final String INDENT = "  ";
+    private static final String[] INDENTS = new String[16];
+
+    static {
+        for (int i = 0; i < INDENTS.length; i++) {
+            INDENTS[i] = INDENT.repeat(i);
+        }
+    }
+
     private final DumperOptions options;
 
-    /**
-     * Constructs a serializer with default options (block style, indent 2).
-     */
     public YamlConfigSerializer() {
         options = new DumperOptions();
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
@@ -33,11 +32,6 @@ public class YamlConfigSerializer implements ConfigSerializer<YamlConfigSection>
         options.setPrettyFlow(true);
     }
 
-    /**
-     * Constructs a serializer with custom {@link DumperOptions}.
-     *
-     * @param options the SnakeYAML dumper options to use
-     */
     public YamlConfigSerializer(DumperOptions options) {
         this.options = options;
     }
@@ -58,14 +52,9 @@ public class YamlConfigSerializer implements ConfigSerializer<YamlConfigSection>
                 String path = prefix.isEmpty() ? entry.getKey() : prefix + "." + entry.getKey();
                 String comment = comments != null ? comments.get(path) : null;
                 if (comment != null) {
-                    for (String line : comment.split("\n")) {
-                        writeIndent(writer, indent);
-                        writer.write("# ");
-                        writer.write(line);
-                        writer.write("\n");
-                    }
+                    writeComment(writer, comment, indent);
                 }
-                writeIndent(writer, indent);
+                writer.write(indent(indent));
                 writer.write(entry.getKey());
                 writer.write(":");
                 Object val = entry.getValue();
@@ -83,7 +72,7 @@ public class YamlConfigSerializer implements ConfigSerializer<YamlConfigSection>
             }
         } else if (value instanceof List) {
             for (Object item : (List<?>) value) {
-                writeIndent(writer, indent);
+                writer.write(indent(indent));
                 writer.write("- ");
                 if (item instanceof Map) {
                     writer.write("\n");
@@ -99,10 +88,23 @@ public class YamlConfigSerializer implements ConfigSerializer<YamlConfigSection>
         }
     }
 
-    private void writeIndent(Writer writer, int indent) throws IOException {
-        for (int i = 0; i < indent * options.getIndent(); i++) {
-            writer.write(' ');
+    private void writeComment(Writer writer, String comment, int indent) throws IOException {
+        String base = indent(indent) + "# ";
+        int start = 0;
+        int end;
+        while ((end = comment.indexOf('\n', start)) != -1) {
+            writer.write(base);
+            writer.write(comment, start, end - start);
+            writer.write("\n");
+            start = end + 1;
         }
+        writer.write(base);
+        writer.write(comment, start, comment.length() - start);
+        writer.write("\n");
+    }
+
+    private static String indent(int depth) {
+        return depth < INDENTS.length ? INDENTS[depth] : INDENT.repeat(depth);
     }
 
     private void writeScalar(Writer writer, Object value) throws IOException {

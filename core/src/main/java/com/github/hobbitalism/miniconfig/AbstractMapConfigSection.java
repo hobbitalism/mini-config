@@ -39,10 +39,21 @@ public abstract class AbstractMapConfigSection implements ConfigSection {
     // -------------------------------------------------------------------------
 
     /**
-     * Splits a dot-separated path into its segments.
+     * Splits a dot-separated path into its segments without regex allocation.
      */
     private static String[] split(String key) {
-        return key.split("\\.", -1);
+        if (key.indexOf('.') == -1) {
+            return new String[]{key};
+        }
+        java.util.ArrayList<String> parts = new java.util.ArrayList<>(4);
+        int start = 0;
+        int end;
+        while ((end = key.indexOf('.', start)) != -1) {
+            parts.add(key.substring(start, end));
+            start = end + 1;
+        }
+        parts.add(key.substring(start));
+        return parts.toArray(new String[0]);
     }
 
     /**

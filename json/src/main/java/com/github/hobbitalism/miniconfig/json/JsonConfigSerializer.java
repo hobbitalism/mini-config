@@ -1,7 +1,6 @@
 package com.github.hobbitalism.miniconfig.json;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.github.hobbitalism.miniconfig.ConfigSerializer;
@@ -11,35 +10,23 @@ import java.io.Writer;
 import java.util.List;
 import java.util.Map;
 
-/**
- * {@link ConfigSerializer} that writes a {@link JsonConfigSection} to pretty-printed
- * JSON using Jackson's {@link ObjectMapper}.
- *
- * <pre>{@code
- * JsonConfigSerializer serializer = new JsonConfigSerializer();
- * serializer.save(section, new FileWriter("config.json"));
- * }</pre>
- */
 public class JsonConfigSerializer implements ConfigSerializer<JsonConfigSection> {
 
     private static final String INDENT = "  ";
+    private static final String[] INDENTS = new String[16];
+
+    static {
+        for (int i = 0; i < INDENTS.length; i++) {
+            INDENTS[i] = INDENT.repeat(i);
+        }
+    }
 
     private final ObjectMapper mapper;
 
-    /**
-     * Constructs a serializer with a default pretty-printing {@link ObjectMapper}.
-     */
     public JsonConfigSerializer() {
-        this(new ObjectMapper()
-                .configure(JsonParser.Feature.ALLOW_COMMENTS, true)
-                .enable(SerializationFeature.INDENT_OUTPUT));
+        this(JsonConfigLoader.SHARED_MAPPER.copy().enable(SerializationFeature.INDENT_OUTPUT));
     }
 
-    /**
-     * Constructs a serializer with a custom {@link ObjectMapper}.
-     *
-     * @param mapper the Jackson object mapper to use for serialization
-     */
     public JsonConfigSerializer(ObjectMapper mapper) {
         this.mapper = mapper;
     }
@@ -64,14 +51,12 @@ public class JsonConfigSerializer implements ConfigSerializer<JsonConfigSection>
                 String path = prefix.isEmpty() ? entry.getKey() : prefix + "." + entry.getKey();
                 String comment = comments != null ? comments.get(path) : null;
                 if (comment != null) {
-                    for (String line : comment.split("\n")) {
-                        gen.writeRaw(INDENT.repeat(depth + 1) + "// " + line + "\n");
-                    }
+                    writeComment(gen, comment, depth + 1);
                 }
-                gen.writeRaw(INDENT.repeat(depth + 1) + "\"" + entry.getKey() + "\" : ");
+                gen.writeRaw(indent(depth + 1) + "\"" + entry.getKey() + "\" : ");
                 writeValue(gen, entry.getValue(), comments, path, depth + 1);
             }
-            gen.writeRaw("\n" + INDENT.repeat(depth) + "}");
+            gen.writeRaw("\n" + indent(depth) + "}");
         } else if (value instanceof List) {
             gen.writeRaw("[");
             List<?> list = (List<?>) value;
@@ -83,5 +68,24 @@ public class JsonConfigSerializer implements ConfigSerializer<JsonConfigSection>
         } else {
             gen.writeObject(value);
         }
+    }
+
+    private void writeComment(JsonGenerator gen, String comment, int depth) throws IOException {
+        String base = indent(depth) + "// ";
+        int start = 0;
+        int end;
+        while ((end = comment.indexOf('\n', start)) != -1) {
+            gen.writeRaw(base);
+            gen.writeRaw(comment, start, end - start);
+            gen.writeRaw("\n");
+            start = end + 1;
+        }
+        gen.writeRaw(base);
+        gen.writeRaw(comment, start, comment.length() - start);
+        gen.writeRaw("\n");
+    }
+
+    private static String indent(int depth) {
+        return depth < INDENTS.length ? INDENTS[depth] : INDENT.repeat(depth);
     }
 }

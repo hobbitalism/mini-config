@@ -4,10 +4,10 @@ import com.github.hobbitalism.miniconfig.convert.ConversionException;
 import com.github.hobbitalism.miniconfig.convert.Converters;
 import com.github.hobbitalism.miniconfig.convert.TypeConverter;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Registry that maps Java types to their {@link TypeConverter} implementations.
@@ -28,7 +28,7 @@ import java.util.UUID;
  */
 public class ConverterRegistry {
 
-    private final Map<Class<?>, TypeConverter<?>> byType = new HashMap<>();
+    private final Map<Class<?>, TypeConverter<?>> byType = new ConcurrentHashMap<>();
 
     // -------------------------------------------------------------------------
     // Factory

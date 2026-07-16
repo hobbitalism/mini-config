@@ -28,14 +28,17 @@ public class JsonConfigLoader implements ConfigLoader<JsonConfigSection> {
             new TypeReference<>() {
             };
 
+    static final ObjectMapper SHARED_MAPPER = new ObjectMapper()
+            .configure(JsonParser.Feature.ALLOW_COMMENTS, true);
+
     private final ObjectMapper mapper;
 
     /**
-     * Constructs a loader with a default {@link ObjectMapper}
+     * Constructs a loader with a shared default {@link ObjectMapper}
      * configured to allow JSON comments.
      */
     public JsonConfigLoader() {
-        this(new ObjectMapper().configure(JsonParser.Feature.ALLOW_COMMENTS, true));
+        this(SHARED_MAPPER);
     }
 
     /**
