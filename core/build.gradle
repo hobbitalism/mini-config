@@ -5,6 +5,7 @@ plugins {
 
 dependencies {
     testImplementation project(':yaml')
+    testImplementation project(':json')
 }
 
 publishing {

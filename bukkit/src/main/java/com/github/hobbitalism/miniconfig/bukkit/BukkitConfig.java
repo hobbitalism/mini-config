@@ -30,7 +30,7 @@ public class BukkitConfig implements Config {
     private final String fileName;
     private final File configFile;
 
-    private FileConfiguration handle;
+    private FileConfiguration handle = new YamlConfiguration();
 
     public BukkitConfig(Plugin plugin, String fileName) {
         this.plugin = plugin;

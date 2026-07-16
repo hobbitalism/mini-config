@@ -6,6 +6,10 @@ plugins {
 repositories {
     maven { url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
     maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+    maven { url 'https://repo.papermc.io/repository/maven-public/' }
+    mavenCentral {
+        metadataSources { mavenPom() }
+    }
 }
 
 dependencies {
@@ -14,7 +18,12 @@ dependencies {
 
     // Bukkit API — provided at runtime by the server
     compileOnly 'org.spigotmc:spigot-api:1.21.4-R0.1-SNAPSHOT'
+
+    // Unit testing with MockBukkit (compiled against Paper API 1.21.11)
+    testImplementation 'org.mockbukkit.mockbukkit:mockbukkit-v1.21:4.110.0'
+    testImplementation 'io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT'
 }
+
 
 publishing {
     publications {
