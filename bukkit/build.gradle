@@ -22,6 +22,13 @@ dependencies {
     // Unit testing with MockBukkit (compiled against Paper API 1.21.11)
     testImplementation 'org.mockbukkit.mockbukkit:mockbukkit-v1.21:4.110.0'
     testImplementation 'io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT'
+
+    // Force secure version of transitive dependency to resolve CVE-2025-67030
+    constraints {
+        implementation('org.codehaus.plexus:plexus-utils:4.0.3') {
+            because 'Fixes CVE-2025-67030 path traversal vulnerability'
+        }
+    }
 }
 
 
