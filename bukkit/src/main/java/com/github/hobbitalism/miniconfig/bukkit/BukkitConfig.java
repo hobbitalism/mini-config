@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
@@ -57,7 +58,7 @@ public class BukkitConfig implements Config {
         try (InputStream defaultStream = plugin.getResource(fileName)) {
             if (defaultStream != null) {
                 try (BufferedReader reader = new BufferedReader(
-                        new java.io.InputStreamReader(defaultStream, StandardCharsets.UTF_8))) {
+                        new InputStreamReader(defaultStream, StandardCharsets.UTF_8))) {
                     YamlConfiguration defaults = YamlConfiguration.loadConfiguration(reader);
                     handle.setDefaults(defaults);
                 }
@@ -65,14 +66,22 @@ public class BukkitConfig implements Config {
         }
     }
 
-    @Override
-    public void save() throws IOException {
-        try {
-            handle.save(configFile);
-        } catch (Exception e) {
-            throw new IOException("Failed to save config: " + configFile.getPath(), e);
-        }
-    }
+     @Override
+     public void save() throws IOException {
+         try {
+             handle.save(configFile);
+         } catch (Exception e) {
+             throw new IOException("Failed to save config: " + configFile.getPath(), e);
+         }
+     }
+
+     @Override
+     public void loadFromStream(InputStream stream) throws IOException {
+         try (BufferedReader reader = new BufferedReader(
+                 new InputStreamReader(stream, StandardCharsets.UTF_8))) {
+             handle = YamlConfiguration.loadConfiguration(reader);
+         }
+     }
 
     // -------------------------------------------------------------------------
     // ConfigSection — read
