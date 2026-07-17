@@ -12,11 +12,10 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.hobbitalism:mini-config:VERSION'
-    // Or depend on specific modules:
-    implementation 'com.github.hobbitalism:mini-config:VERSION:yaml'
-    implementation 'com.github.hobbitalism:mini-config:VERSION:json'
-    implementation 'com.github.hobbitalism:mini-config:VERSION:bukkit'
+    api 'com.github.hobbitalism.mini-config:mini-config-core:v0.1.1'
+    api 'com.github.hobbitalism.mini-config:mini-config-yaml:v0.1.1'
+    api 'com.github.hobbitalism.mini-config:mini-config-json:v0.1.1'
+    api 'com.github.hobbitalism.mini-config:mini-config-bukkit:v0.1.1'
 }
 ```
 
@@ -31,26 +30,18 @@ dependencies {
 </repositories>
 
 <dependency>
-    <groupId>com.github.hobbitalism</groupId>
-    <artifactId>mini-config</artifactId>
-    <version>VERSION</version>
-</dependency>
-<!-- Or specific modules: -->
-<dependency>
-    <groupId>com.github.hobbitalism</groupId>
-    <artifactId>mini-config</artifactId>
-    <version>VERSION</version>
-    <classifier>yaml</classifier>
+    <groupId>com.github.hobbitalism.mini-config</groupId>
+    <artifactId>mini-config-core</artifactId>
+    <version>v0.1.1</version>
 </dependency>
 <dependency>
-    <groupId>com.github.hobbitalism</groupId>
-    <artifactId>mini-config</artifactId>
-    <version>VERSION</version>
-    <classifier>json</classifier>
+    <groupId>com.github.hobbitalism.mini-config</groupId>
+    <artifactId>mini-config-yaml</artifactId>
+    <version>v0.1.1</version>
 </dependency>
 ```
 
-Replace `VERSION` with a [Git tag](https://github.com/hobbitalism/mini-config/tags) or a commit hash.
+Replace the version with a [Git tag](https://github.com/hobbitalism/mini-config/tags) or a commit hash.
 
 > JitPack builds require Java 21. Ensure your project targets at least JDK 21, or configure
 > [jitpack.yml](jitpack.yml) if using a custom build environment.
