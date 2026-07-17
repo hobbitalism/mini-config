@@ -25,7 +25,6 @@ public class YamlConfigLoader implements ConfigLoader<YamlConfigSection> {
     private static final ThreadLocal<Yaml> YAML = ThreadLocal.withInitial(Yaml::new);
 
     @Override
-    @SuppressWarnings("unchecked")
     public YamlConfigSection load(Reader reader) throws IOException {
         Object parsed = YAML.get().load(reader);
         if (parsed == null) {
@@ -44,7 +43,6 @@ public class YamlConfigLoader implements ConfigLoader<YamlConfigSection> {
      * SnakeYAML can produce non-string keys for complex YAML, but config
      * files are expected to have string keys only.
      */
-    @SuppressWarnings("unchecked")
     private Map<String, Object> toStringKeyMap(Map<?, ?> raw) {
         Map<String, Object> result = new LinkedHashMap<>(raw.size());
         for (Map.Entry<?, ?> entry : raw.entrySet()) {

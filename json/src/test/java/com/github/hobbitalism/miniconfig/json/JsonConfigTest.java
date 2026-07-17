@@ -7,8 +7,11 @@ import com.github.hobbitalism.miniconfig.annotation.Path;
 import com.github.hobbitalism.miniconfig.container.ConfigContainer;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.UUID;
@@ -130,5 +133,151 @@ class JsonConfigTest {
         assertTrue(content.contains("// The hostname to bind to"));
         assertTrue(content.contains("// The listening port"));
         assertTrue(content.contains("// Change this to 443 for production"));
+    }
+
+    @Test
+    void loadFromStream_loadsJsonData() throws IOException {
+        String json = """
+                {
+                  "server": {
+                    "host": "stream.example.com",
+                    "port": 9090
+                  },
+                  "worlds": ["survival", "creative"]
+                }
+                """;
+        InputStream stream = new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8));
+
+        java.nio.file.Path tmpDir = java.nio.file.Path.of("build", "tmp");
+        Files.createDirectories(tmpDir);
+        java.nio.file.Path configFile = tmpDir.resolve(UUID.randomUUID() + ".json");
+
+        JsonConfig config = new JsonConfig(configFile);
+        config.loadFromStream(stream);
+
+        assertEquals("stream.example.com", config.getString("server.host", ""));
+        assertEquals(9090, config.getInt("server.port", 0));
+        assertEquals(List.of("survival", "creative"), config.getStringList("worlds"));
+    }
+
+    @Test
+    void loadFromStream_pojoBinding() throws IOException {
+        String json = """
+                {
+                  "server": {
+                    "host": "pojo.example.com",
+                    "port": 5555,
+                    "debug": true
+                  },
+                  "worlds": ["nether", "end", "overworld"]
+                }
+                """;
+        InputStream stream = new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8));
+
+        java.nio.file.Path tmpDir = java.nio.file.Path.of("build", "tmp");
+        Files.createDirectories(tmpDir);
+        java.nio.file.Path configFile = tmpDir.resolve(UUID.randomUUID() + ".json");
+
+        JsonConfig config = new JsonConfig(configFile);
+        config.loadFromStream(stream);
+
+        ServerConfig pojo = new ServerConfig();
+        ConfigContainer container = new ConfigContainer();
+        container.load(pojo, config);
+
+        assertEquals("pojo.example.com", pojo.host);
+        assertEquals(5555, pojo.port);
+        assertTrue(pojo.debug);
+        assertEquals(List.of("nether", "end", "overworld"), pojo.worlds);
+    }
+
+    @Test
+    void loadFromStream_withComments() throws IOException {
+        String json = """
+                {
+                  // This is a comment
+                  "server": {
+                    "host": "commented.example.com",
+                    "port": 7777 // inline comment
+                  }
+                }
+                """;
+        InputStream stream = new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8));
+
+        java.nio.file.Path tmpDir = java.nio.file.Path.of("build", "tmp");
+        Files.createDirectories(tmpDir);
+        java.nio.file.Path configFile = tmpDir.resolve(UUID.randomUUID() + ".json");
+
+        JsonConfig config = new JsonConfig(configFile);
+        config.loadFromStream(stream);
+
+        assertEquals("commented.example.com", config.getString("server.host", ""));
+        assertEquals(7777, config.getInt("server.port", 0));
+    }
+
+    @Test
+    void loadFromStream_multipleLoads() throws IOException {
+        String json1 = """
+                {
+                  "server": {
+                    "host": "first.example.com",
+                    "port": 1111
+                  }
+                }
+                """;
+        String json2 = """
+                {
+                  "server": {
+                    "host": "second.example.com",
+                    "port": 2222
+                  }
+                }
+                """;
+
+        java.nio.file.Path tmpDir = java.nio.file.Path.of("build", "tmp");
+        Files.createDirectories(tmpDir);
+        java.nio.file.Path configFile = tmpDir.resolve(UUID.randomUUID() + ".json");
+
+        JsonConfig config = new JsonConfig(configFile);
+
+        // Load first stream
+        config.loadFromStream(new ByteArrayInputStream(json1.getBytes(StandardCharsets.UTF_8)));
+        assertEquals("first.example.com", config.getString("server.host", ""));
+        assertEquals(1111, config.getInt("server.port", 0));
+
+        // Load second stream — should replace
+        config.loadFromStream(new ByteArrayInputStream(json2.getBytes(StandardCharsets.UTF_8)));
+        assertEquals("second.example.com", config.getString("server.host", ""));
+        assertEquals(2222, config.getInt("server.port", 0));
+    }
+
+    @Test
+    void loadFromStream_doesNotWriteToFile() throws IOException {
+        String json = """
+                {
+                  "server": {
+                    "host": "nofile.example.com",
+                    "port": 3333
+                  }
+                }
+                """;
+        InputStream stream = new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8));
+
+        java.nio.file.Path tmpDir = java.nio.file.Path.of("build", "tmp");
+        Files.createDirectories(tmpDir);
+        java.nio.file.Path configFile = tmpDir.resolve(UUID.randomUUID() + ".json");
+
+        JsonConfig config = new JsonConfig(configFile);
+        config.loadFromStream(stream);
+
+        // Data is loaded in memory
+        assertEquals("nofile.example.com", config.getString("server.host", ""));
+
+        // But file should not exist yet
+        assertFalse(Files.exists(configFile));
+
+        // Only after save should it exist
+        config.save();
+        assertTrue(Files.exists(configFile));
     }
 }

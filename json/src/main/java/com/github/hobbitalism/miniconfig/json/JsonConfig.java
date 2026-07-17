@@ -7,6 +7,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -83,15 +84,23 @@ public class JsonConfig implements Config {
         }
     }
 
-    @Override
-    public void save() throws IOException {
-        if (filePath.getParent() != null) {
-            Files.createDirectories(filePath.getParent());
-        }
-        try (BufferedWriter writer = Files.newBufferedWriter(filePath, StandardCharsets.UTF_8)) {
-            serializer.save(section, writer);
-        }
-    }
+     @Override
+     public void save() throws IOException {
+         if (filePath.getParent() != null) {
+             Files.createDirectories(filePath.getParent());
+         }
+         try (BufferedWriter writer = Files.newBufferedWriter(filePath, StandardCharsets.UTF_8)) {
+             serializer.save(section, writer);
+         }
+     }
+
+     @Override
+     public void loadFromStream(InputStream stream) throws IOException {
+         try (BufferedReader reader = new BufferedReader(
+                 new InputStreamReader(stream, StandardCharsets.UTF_8))) {
+             section = loader.load(reader);
+         }
+     }
 
     // -------------------------------------------------------------------------
     // ConfigSection — delegate to the live section

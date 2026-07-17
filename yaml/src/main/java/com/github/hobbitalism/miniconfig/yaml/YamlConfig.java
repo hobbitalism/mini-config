@@ -83,15 +83,23 @@ public class YamlConfig implements Config {
         }
     }
 
-    @Override
-    public void save() throws IOException {
-        if (filePath.getParent() != null) {
-            Files.createDirectories(filePath.getParent());
-        }
-        try (BufferedWriter writer = Files.newBufferedWriter(filePath, StandardCharsets.UTF_8)) {
-            serializer.save(section, writer);
-        }
-    }
+     @Override
+     public void save() throws IOException {
+         if (filePath.getParent() != null) {
+             Files.createDirectories(filePath.getParent());
+         }
+         try (BufferedWriter writer = Files.newBufferedWriter(filePath, StandardCharsets.UTF_8)) {
+             serializer.save(section, writer);
+         }
+     }
+
+     @Override
+     public void loadFromStream(InputStream stream) throws IOException {
+         try (BufferedReader reader = new BufferedReader(
+                 new InputStreamReader(stream, StandardCharsets.UTF_8))) {
+             section = loader.load(reader);
+         }
+     }
 
     // -------------------------------------------------------------------------
     // ConfigSection — delegate to the live section
